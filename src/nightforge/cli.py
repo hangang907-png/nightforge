@@ -12,6 +12,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 from nightforge.github import claim_github_ticket, create_draft_pull_request, list_open_tickets
 from nightforge.governance import transition_ticket_state
+from nightforge.publish import publish_manifest
 
 
 def _sha256(path: Path) -> str:
@@ -150,6 +151,13 @@ def main() -> None:
     draft_parser.add_argument("--body", required=True)
     draft_parser.add_argument("--registry", type=Path, default=Path("config/repositories.json"))
 
+    publish_parser = subparsers.add_parser("publish")
+    publish_parser.add_argument("manifest", type=Path)
+    publish_parser.add_argument("--repo-path", type=Path, default=Path("."))
+    publish_parser.add_argument("--github-repo", required=True)
+    publish_parser.add_argument("--base", default="main")
+    publish_parser.add_argument("--registry", type=Path, default=Path("config/repositories.json"))
+
     args = parser.parse_args()
     if args.command == "validate":
         document = json.loads(args.document.read_text(encoding="utf-8"))
@@ -174,6 +182,8 @@ def main() -> None:
                 args.repository, args.registry, args.head, args.base, args.title, args.body
             )
         )
+    elif args.command == "publish":
+        _print(publish_manifest(args.repo_path, args.manifest, args.github_repo, args.registry, args.base))
 
 
 if __name__ == "__main__":
