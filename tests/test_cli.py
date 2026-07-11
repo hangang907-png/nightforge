@@ -1,6 +1,7 @@
 import hashlib
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -88,7 +89,9 @@ def test_webhook_cli_records_payload(tmp_path):
 
     result = subprocess.run(
         [
-            str(ROOT / ".venv/bin/nightforge"),
+            sys.executable,
+            "-m",
+            "nightforge.cli",
             "webhook",
             "delivery-456",
             "issues",
