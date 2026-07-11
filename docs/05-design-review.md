@@ -38,4 +38,10 @@ GitHub API 연동 전에 로컬 CLI가 다음 불변식을 보장해야 한다.
 2. 클레임은 티켓 원문의 SHA-256에 결박된다.
 3. 제출 manifest는 패치 SHA-256과 검증 명령을 포함한다.
 4. 파일 기록은 임시 파일 후 원자적 교체로 완료된다.
-5. GitHub 연동 시 모든 웹훅은 delivery ID로 멱등 처리한다.
+5. GitHub 연동 시 모든 웹훅은 delivery ID로 멱등 처리한다. ✅ 로컬 receipt 저장 구현
+
+## 후속 게이트
+
+1. GitHub Issue 템플릿과 티켓 라벨 상태머신
+2. GitHub API 기반 티켓 조회·클레임(Draft PR 상한 유지)
+3. 웹훅 서명 검증과 서버리스 수신기 연결

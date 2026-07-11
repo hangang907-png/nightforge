@@ -26,6 +26,7 @@ python3 -m venv .venv
 .venv/bin/nightforge validate examples/ticket.json schemas/ticket.schema.json
 .venv/bin/nightforge claim examples/ticket.json --node node-a
 .venv/bin/nightforge submit DEV-1 change.patch --node node-a --verify "pytest -q"
+.venv/bin/nightforge webhook delivery-123 issues payload.json
 ```
 
 ## 상태
@@ -33,4 +34,5 @@ python3 -m venv .venv
 설계 검증 및 MVP0 구현 단계. 현재 이터레이션:
 - RFC·티켓·원장 이벤트 JSON Schema
 - 노드 CLI 최소 수직 흐름 (검증 → 클레임 → 결과 manifest 제출)
-- GitHub 연동 전 로컬 테스트
+- 웹훅 delivery ID 멱등 기록 (중복 이벤트 무시)
+- GitHub API 연동 전 로컬 테스트

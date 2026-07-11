@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -43,6 +44,32 @@ def claim_ticket(ticket_path: Path, node_id: str, output_dir: Path) -> dict[str,
         "ticket_sha256": _sha256(ticket_path),
     }
     _write_json(output_dir / f"{ticket['id']}.{node_id}.json", receipt)
+    return receipt
+
+
+def record_webhook_delivery(
+    delivery_id: str,
+    event: str,
+    payload: bytes,
+    output_dir: Path,
+) -> dict[str, Any]:
+    if not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", delivery_id):
+        raise ValueError("delivery ID must contain only letters, digits, underscores, or hyphens")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    receipt_path = output_dir / f"{delivery_id}.json"
+    receipt = {
+        "accepted": True,
+        "delivery_id": delivery_id,
+        "event": event,
+        "payload_sha256": hashlib.sha256(payload).hexdigest(),
+        "received_at": datetime.now(timezone.utc).isoformat(),
+    }
+    try:
+        with receipt_path.open("x", encoding="utf-8") as handle:
+            json.dump(receipt, handle, ensure_ascii=False, indent=2)
+            handle.write("\n")
+    except FileExistsError:
+        return {"accepted": False, "delivery_id": delivery_id, "duplicate": True}
     return receipt
 
 
@@ -94,6 +121,12 @@ def main() -> None:
     submit_parser.add_argument("--verify", action="append", required=True)
     submit_parser.add_argument("--output", type=Path, default=Path(".nightforge/submissions"))
 
+    webhook_parser = subparsers.add_parser("webhook")
+    webhook_parser.add_argument("delivery_id")
+    webhook_parser.add_argument("event")
+    webhook_parser.add_argument("payload", type=Path)
+    webhook_parser.add_argument("--output", type=Path, default=Path(".nightforge/deliveries"))
+
     args = parser.parse_args()
     if args.command == "validate":
         document = json.loads(args.document.read_text(encoding="utf-8"))
@@ -103,6 +136,8 @@ def main() -> None:
         _print(claim_ticket(args.ticket, args.node, args.output))
     elif args.command == "submit":
         _print(submit_result(args.ticket_id, args.node, args.patch, args.verify, args.output))
+    elif args.command == "webhook":
+        _print(record_webhook_delivery(args.delivery_id, args.event, args.payload.read_bytes(), args.output))
 
 
 if __name__ == "__main__":
