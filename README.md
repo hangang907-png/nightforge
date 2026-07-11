@@ -28,6 +28,8 @@ python3 -m venv .venv
 .venv/bin/nightforge submit DEV-1 change.patch --node node-a --verify "pytest -q"
 .venv/bin/nightforge webhook delivery-123 issues payload.json
 .venv/bin/nightforge transition state:claimed state:submitted
+.venv/bin/nightforge github-list hangang907-png/nightforge
+.venv/bin/nightforge github-claim hangang907-png/nightforge 123 --node hangang907-png
 ```
 
 ## 상태
@@ -38,4 +40,5 @@ python3 -m venv .venv
 - 웹훅 delivery ID 멱등 기록 (중복 이벤트 무시)
 - RFC·개발 티켓 GitHub Issue Forms
 - 티켓 라벨 상태머신 (`open → claimed → submitted → verifying → accepted/rejected`)
-- GitHub API 연동 전 로컬 테스트
+- GitHub API 티켓 조회 및 단일 PATCH 클레임(assignee + 상태 라벨)
+- 옵트인 저장소/Draft PR 정책 검증 전 단계

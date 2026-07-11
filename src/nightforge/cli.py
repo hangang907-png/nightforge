@@ -10,6 +10,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from nightforge.github import claim_github_ticket, list_open_tickets
 from nightforge.governance import transition_ticket_state
 
 
@@ -133,6 +134,14 @@ def main() -> None:
     transition_parser.add_argument("current")
     transition_parser.add_argument("target")
 
+    github_list_parser = subparsers.add_parser("github-list")
+    github_list_parser.add_argument("repository")
+
+    github_claim_parser = subparsers.add_parser("github-claim")
+    github_claim_parser.add_argument("repository")
+    github_claim_parser.add_argument("issue", type=int)
+    github_claim_parser.add_argument("--node", required=True)
+
     args = parser.parse_args()
     if args.command == "validate":
         document = json.loads(args.document.read_text(encoding="utf-8"))
@@ -147,6 +156,10 @@ def main() -> None:
     elif args.command == "transition":
         target = transition_ticket_state(args.current, args.target)
         _print({"from": args.current, "to": target, "valid": True})
+    elif args.command == "github-list":
+        print(json.dumps(list_open_tickets(args.repository), ensure_ascii=False, indent=2))
+    elif args.command == "github-claim":
+        _print(claim_github_ticket(args.repository, args.issue, args.node))
 
 
 if __name__ == "__main__":

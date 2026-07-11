@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -131,3 +132,23 @@ def test_transition_cli_reports_next_label():
 
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout) == {"from": "state:claimed", "to": "state:submitted", "valid": True}
+
+
+def test_github_list_cli_returns_open_tickets(tmp_path):
+    fake_gh = tmp_path / "gh"
+    fake_gh.write_text("#!/bin/sh\nprintf '%s' '[{\"number\":7,\"title\":\"Repair CI\",\"labels\":[]}]'\n", encoding="utf-8")
+    fake_gh.chmod(0o755)
+    environment = os.environ.copy()
+    environment["PATH"] = f"{tmp_path}:{environment['PATH']}"
+
+    result = subprocess.run(
+        [sys.executable, "-m", "nightforge.cli", "github-list", "owner/repo"],
+        cwd=ROOT,
+        env=environment,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout)[0]["number"] == 7
