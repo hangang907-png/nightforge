@@ -3,7 +3,12 @@ from pathlib import Path
 
 import pytest
 
-from nightforge.github import build_claim_update, build_draft_pull_request, require_opt_in
+from nightforge.github import (
+    build_claim_update,
+    build_draft_pull_request,
+    build_state_update,
+    require_opt_in,
+)
 
 
 def test_claim_update_replaces_open_state_and_preserves_labels():
@@ -52,3 +57,24 @@ def test_draft_pull_request_payload_cannot_be_published_ready():
 
     assert payload["draft"] is True
     assert payload["head"] == "nightforge/ticket-1"
+
+
+def test_state_update_preserves_non_state_labels():
+    issue = {
+        "labels": [
+            {"name": "kind:ticket"},
+            {"name": "state:claimed"},
+            {"name": "documentation"},
+        ]
+    }
+
+    assert build_state_update(issue, "state:submitted") == {
+        "labels": ["kind:ticket", "documentation", "state:submitted"]
+    }
+
+
+def test_state_update_rejects_invalid_transition():
+    issue = {"labels": [{"name": "kind:ticket"}, {"name": "state:claimed"}]}
+
+    with pytest.raises(ValueError, match="invalid ticket transition"):
+        build_state_update(issue, "state:accepted")

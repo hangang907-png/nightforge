@@ -7,7 +7,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from nightforge.github import create_draft_pull_request, require_opt_in
+from nightforge.github import create_draft_pull_request, require_opt_in, transition_github_ticket
 
 
 def _run(command: list[str], cwd: Path) -> str:
@@ -63,6 +63,7 @@ def publish_manifest(
     github_repository: str,
     registry_path: Path,
     base_ref: str,
+    issue_number: int | None = None,
 ) -> dict[str, Any]:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     artifact = Path(manifest["artifact"])
@@ -90,6 +91,19 @@ def publish_manifest(
         prepared["branch"],
         base_ref,
         f"{manifest['ticket_id']}: NightForge submission from {manifest['node_id']}",
-        f"NightForge automated Draft PR.\n\nTicket: {manifest['ticket_id']}\nPatch SHA-256: `{actual_hash}`",
+        (
+            f"NightForge automated Draft PR.\n\nTicket: {manifest['ticket_id']}\n"
+            f"Ticket Issue: #{issue_number}\nPatch SHA-256: `{actual_hash}`"
+            if issue_number is not None
+            else f"NightForge automated Draft PR.\n\nTicket: {manifest['ticket_id']}\nPatch SHA-256: `{actual_hash}`"
+        ),
     )
-    return {**prepared, "pull_request": pull_request, "artifact_sha256": actual_hash}
+    ticket_issue = None
+    if issue_number is not None:
+        ticket_issue = transition_github_ticket(github_repository, issue_number, "state:submitted")
+    return {
+        **prepared,
+        "pull_request": pull_request,
+        "ticket_issue": ticket_issue,
+        "artifact_sha256": actual_hash,
+    }

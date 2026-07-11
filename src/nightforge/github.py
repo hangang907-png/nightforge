@@ -52,6 +52,25 @@ def _gh_api(endpoint: str, method: str = "GET", fields: dict[str, Any] | None = 
     return json.loads(result.stdout)
 
 
+def build_state_update(issue: dict[str, Any], target: str) -> dict[str, list[str]]:
+    labels = _label_names(issue)
+    if "kind:ticket" not in labels:
+        raise ValueError("issue is not a NightForge ticket")
+    states = [label for label in labels if label.startswith("state:")]
+    if len(states) != 1:
+        raise ValueError("ticket must have exactly one state label")
+    transition_ticket_state(states[0], target)
+    retained = [label for label in labels if not label.startswith("state:")]
+    return {"labels": [*retained, target]}
+
+
+def transition_github_ticket(repository: str, issue_number: int, target: str) -> dict[str, Any]:
+    _check_repository(repository)
+    issue = _gh_api(f"repos/{repository}/issues/{issue_number}")
+    update = build_state_update(issue, target)
+    return _gh_api(f"repos/{repository}/issues/{issue_number}", method="PATCH", fields=update)
+
+
 def require_opt_in(repository: str, registry_path: Path) -> dict[str, Any]:
     _check_repository(repository)
     registry = json.loads(registry_path.read_text(encoding="utf-8"))
@@ -81,6 +100,11 @@ def create_draft_pull_request(
         raise ValueError(f"base ref is not allowed: {base}")
     payload = build_draft_pull_request(head, base, title, body)
     return _gh_api(f"repos/{repository}/pulls", method="POST", fields=payload)
+
+
+def get_github_pull_request(repository: str, pull_number: int) -> dict[str, Any]:
+    _check_repository(repository)
+    return _gh_api(f"repos/{repository}/pulls/{pull_number}")
 
 
 def list_open_tickets(repository: str) -> list[dict[str, Any]]:

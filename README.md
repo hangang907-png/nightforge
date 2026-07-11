@@ -33,7 +33,8 @@ python3 -m venv .venv
 .venv/bin/nightforge github-draft hangang907-png/nightforge nightforge/ticket-123 \
   --title "fix: repair CI" --body "Closes #123"
 .venv/bin/nightforge publish .nightforge/submissions/DEV-1.node-a.json \
-  --github-repo hangang907-png/nightforge
+  --github-repo hangang907-png/nightforge --issue 123
+.venv/bin/nightforge webhook-state hangang907-png/nightforge check-suite.json
 ```
 
 ## 상태
@@ -48,4 +49,6 @@ python3 -m venv .venv
 - 유지관리자 옵트인 저장소 레지스트리
 - GitHub API가 `draft: true`를 강제하는 Draft PR 제출
 - `nightforge publish`: manifest hash 검증 → 격리 worktree → patch 적용 → 검증 → 브랜치 push → Draft PR
-- 티켓 상태·Proof Engine 웹훅 자동 연동 전 단계
+- Draft PR 생성 성공 시 티켓 `claimed → submitted`
+- `check_suite` 시작/완료 이벤트를 `verifying → accepted/rejected`로 변환
+- 웹훅 HMAC 서명 검증·서버리스 수신기 전 단계

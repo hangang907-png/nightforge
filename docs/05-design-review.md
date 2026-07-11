@@ -46,5 +46,5 @@ GitHub API 연동 전에 로컬 CLI가 다음 불변식을 보장해야 한다.
 2. GitHub API 기반 티켓 조회·클레임 ✅ (assignee와 상태 라벨을 단일 PATCH로 갱신)
 3. 옵트인 저장소 검증과 Draft PR 제출 상한 ✅
 4. 패치 브랜치 자동 생성·푸시 ✅ (`nightforge publish`)
-5. 티켓 상태와 Proof Engine 결과 자동 연동
-6. 웹훅 서명 검증과 서버리스 수신기 연결
+5. 티켓 상태와 Proof Engine 결과 자동 연동 ✅ (`publish --issue`, `webhook-state`)
+6. 웹훅 HMAC 서명 검증과 서버리스 수신기 연결
