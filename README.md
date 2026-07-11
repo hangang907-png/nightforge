@@ -17,6 +17,7 @@
 | [03-architecture-github.md](docs/03-architecture-github.md) | GitHub 프리미티브 최대 활용 아키텍처, 최소 중앙 구성 |
 | [04-roadmap.md](docs/04-roadmap.md) | MVP0 → MVP1 → MVP2 로드맵과 성공 지표 |
 | [05-design-review.md](docs/05-design-review.md) | 기술 가정 검토, 확정·수정 사항, 다음 게이트 |
+| [06-aws-webhook.md](docs/06-aws-webhook.md) | Lambda + API Gateway + DynamoDB 운영 배포 |
 
 ## MVP0 CLI
 
@@ -56,4 +57,5 @@ NIGHTFORGE_WEBHOOK_SECRET='replace-me' \
 - `X-Hub-Signature-256` HMAC-SHA256 상수시간 검증
 - delivery ID 원자적 멱등 처리, 1 MiB payload 제한, `check_suite`/`ping` 허용목록
 - 의존성 없는 WSGI 웹훅 수신기 (`nightforge webhook-serve`)
-- 외부 서버리스 플랫폼 배포 설정 전 단계
+- AWS SAM 배포 어댑터: Lambda + API Gateway + DynamoDB 영구 delivery receipt
+- Lambda는 `NIGHTFORGE_GITHUB_TOKEN`으로 GitHub REST API를 호출하며 `gh` CLI 의존성이 없음

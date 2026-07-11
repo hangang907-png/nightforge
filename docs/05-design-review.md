@@ -48,4 +48,4 @@ GitHub API 연동 전에 로컬 CLI가 다음 불변식을 보장해야 한다.
 4. 패치 브랜치 자동 생성·푸시 ✅ (`nightforge publish`)
 5. 티켓 상태와 Proof Engine 결과 자동 연동 ✅ (`publish --issue`, `webhook-state`)
 6. 웹훅 HMAC 검증·멱등 수신기 ✅ (`webhook-serve`)
-7. 외부 서버리스 플랫폼 배포 설정과 운영 저장소 연결
+7. 외부 서버리스 플랫폼 배포 설정과 운영 저장소 연결 ✅ (`infra/template.yaml`: Lambda + API Gateway + DynamoDB receipt)

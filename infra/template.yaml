@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: NightForge signed GitHub webhook receiver with DynamoDB delivery idempotency.
+
+Parameters:
+  GitHubRepository:
+    Type: String
+    Description: Opted-in target repository in owner/name form.
+  GitHubWebhookSecret:
+    Type: String
+    NoEcho: true
+    Description: GitHub webhook secret configured for the repository webhook.
+  GitHubToken:
+    Type: String
+    NoEcho: true
+    Description: Fine-grained GitHub token with Issues read/write and Pull requests read access.
+
+Resources:
+  DeliveryReceipts:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: delivery_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: delivery_id
+          KeyType: HASH
+      SSESpecification:
+        SSEEnabled: true
+
+  WebhookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../src/
+      Handler: nightforge.lambda_handler.handler
+      Runtime: python3.12
+      Architectures: [arm64]
+      MemorySize: 256
+      Timeout: 20
+      Environment:
+        Variables:
+          NIGHTFORGE_DELIVERY_TABLE: !Ref DeliveryReceipts
+          NIGHTFORGE_GITHUB_REPOSITORY: !Ref GitHubRepository
+          NIGHTFORGE_GITHUB_TOKEN: !Ref GitHubToken
+          NIGHTFORGE_WEBHOOK_SECRET: !Ref GitHubWebhookSecret
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref DeliveryReceipts
+      Events:
+        GitHubWebhook:
+          Type: Api
+          Properties:
+            Path: /webhook
+            Method: post
+
+Outputs:
+  WebhookUrl:
+    Description: Configure this URL as the GitHub webhook Payload URL.
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/webhook"
+  DeliveryReceiptsTable:
+    Value: !Ref DeliveryReceipts

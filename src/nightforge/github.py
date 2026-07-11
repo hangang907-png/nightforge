@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 from pathlib import Path
 from typing import Any
+from urllib import error, request
 
 from nightforge.governance import transition_ticket_state
 
@@ -37,6 +39,26 @@ def _check_repository(repository: str) -> None:
 
 
 def _gh_api(endpoint: str, method: str = "GET", fields: dict[str, Any] | None = None) -> Any:
+    token = os.environ.get("NIGHTFORGE_GITHUB_TOKEN")
+    if token:
+        payload = json.dumps(fields).encode("utf-8") if fields is not None else None
+        api_request = request.Request(
+            f"https://api.github.com/{endpoint.lstrip('/')}",
+            data=payload,
+            method=method,
+            headers={
+                "Accept": "application/vnd.github+json",
+                "Authorization": f"Bearer {token}",
+                "X-GitHub-Api-Version": "2022-11-28",
+                **({"Content-Type": "application/json"} if payload is not None else {}),
+            },
+        )
+        try:
+            with request.urlopen(api_request, timeout=15) as response:
+                return json.loads(response.read())
+        except error.HTTPError as response_error:
+            detail = response_error.read().decode("utf-8", errors="replace")
+            raise RuntimeError(f"GitHub API request failed: {response_error.code} {detail}") from response_error
     command = ["gh", "api", endpoint, "--method", method]
     if fields is not None:
         command.extend(["--input", "-"])

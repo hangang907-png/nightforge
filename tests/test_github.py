@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pytest
 
+import nightforge.github as github
+
 from nightforge.github import (
     build_claim_update,
     build_draft_pull_request,
@@ -78,3 +80,27 @@ def test_state_update_rejects_invalid_transition():
 
     with pytest.raises(ValueError, match="invalid ticket transition"):
         build_state_update(issue, "state:accepted")
+
+
+def test_github_api_uses_token_without_gh_cli(monkeypatch):
+    requests = []
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+        def read(self):
+            return b'{"number": 7}'
+
+    def urlopen(request, timeout):
+        requests.append((request, timeout))
+        return Response()
+
+    monkeypatch.setenv("NIGHTFORGE_GITHUB_TOKEN", "token-value")
+    monkeypatch.setattr(github.request, "urlopen", urlopen)
+
+    assert github._gh_api("repos/owner/repo/issues/7") == {"number": 7}
+    assert requests[0][0].get_header("Authorization") == "Bearer token-value"
