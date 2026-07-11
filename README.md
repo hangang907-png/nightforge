@@ -35,6 +35,8 @@ python3 -m venv .venv
 .venv/bin/nightforge publish .nightforge/submissions/DEV-1.node-a.json \
   --github-repo hangang907-png/nightforge --issue 123
 .venv/bin/nightforge webhook-state hangang907-png/nightforge check-suite.json
+NIGHTFORGE_WEBHOOK_SECRET='replace-me' \
+  .venv/bin/nightforge webhook-serve hangang907-png/nightforge --port 8787
 ```
 
 ## 상태
@@ -51,4 +53,7 @@ python3 -m venv .venv
 - `nightforge publish`: manifest hash 검증 → 격리 worktree → patch 적용 → 검증 → 브랜치 push → Draft PR
 - Draft PR 생성 성공 시 티켓 `claimed → submitted`
 - `check_suite` 시작/완료 이벤트를 `verifying → accepted/rejected`로 변환
-- 웹훅 HMAC 서명 검증·서버리스 수신기 전 단계
+- `X-Hub-Signature-256` HMAC-SHA256 상수시간 검증
+- delivery ID 원자적 멱등 처리, 1 MiB payload 제한, `check_suite`/`ping` 허용목록
+- 의존성 없는 WSGI 웹훅 수신기 (`nightforge webhook-serve`)
+- 외부 서버리스 플랫폼 배포 설정 전 단계

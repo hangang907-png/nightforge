@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -13,6 +14,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 from nightforge.github import claim_github_ticket, create_draft_pull_request, list_open_tickets
 from nightforge.governance import transition_ticket_state
 from nightforge.publish import publish_manifest
+from nightforge.server import run_server
 from nightforge.webhook import process_check_suite_event
 
 
@@ -164,6 +166,13 @@ def main() -> None:
     webhook_state_parser.add_argument("repository")
     webhook_state_parser.add_argument("payload", type=Path)
 
+    serve_parser = subparsers.add_parser("webhook-serve")
+    serve_parser.add_argument("repository")
+    serve_parser.add_argument("--host", default="127.0.0.1")
+    serve_parser.add_argument("--port", type=int, default=8787)
+    serve_parser.add_argument("--secret-env", default="NIGHTFORGE_WEBHOOK_SECRET")
+    serve_parser.add_argument("--deliveries", type=Path, default=Path(".nightforge/deliveries"))
+
     args = parser.parse_args()
     if args.command == "validate":
         document = json.loads(args.document.read_text(encoding="utf-8"))
@@ -202,6 +211,11 @@ def main() -> None:
     elif args.command == "webhook-state":
         payload = json.loads(args.payload.read_text(encoding="utf-8"))
         _print(process_check_suite_event(args.repository, payload))
+    elif args.command == "webhook-serve":
+        secret = os.environ.get(args.secret_env)
+        if not secret:
+            raise ValueError(f"missing webhook secret environment variable: {args.secret_env}")
+        run_server(secret, args.repository, args.deliveries, args.host, args.port)
 
 
 if __name__ == "__main__":
