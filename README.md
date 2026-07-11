@@ -18,6 +18,7 @@
 | [04-roadmap.md](docs/04-roadmap.md) | MVP0 → MVP1 → MVP2 로드맵과 성공 지표 |
 | [05-design-review.md](docs/05-design-review.md) | 기술 가정 검토, 확정·수정 사항, 다음 게이트 |
 | [06-aws-webhook.md](docs/06-aws-webhook.md) | Lambda + API Gateway + DynamoDB 운영 배포 |
+| [07-cloudflare-webhook.md](docs/07-cloudflare-webhook.md) | Worker + D1 + Queue 무서버 운영 배포 |
 
 ## MVP0 CLI
 
@@ -59,3 +60,4 @@ NIGHTFORGE_WEBHOOK_SECRET='replace-me' \
 - 의존성 없는 WSGI 웹훅 수신기 (`nightforge webhook-serve`)
 - AWS SAM 배포 어댑터: Lambda + API Gateway + DynamoDB 영구 delivery receipt
 - Lambda는 `NIGHTFORGE_GITHUB_TOKEN`으로 GitHub REST API를 호출하며 `gh` CLI 의존성이 없음
+- Cloudflare Worker 어댑터: Workers + D1 영구 receipt + Queue 비동기 GitHub 상태 전이
