@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+from pathlib import Path
 from typing import Any
 
 from nightforge.governance import transition_ticket_state
@@ -49,6 +50,37 @@ def _gh_api(endpoint: str, method: str = "GET", fields: dict[str, Any] | None = 
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip() or "GitHub API request failed")
     return json.loads(result.stdout)
+
+
+def require_opt_in(repository: str, registry_path: Path) -> dict[str, Any]:
+    _check_repository(repository)
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    for entry in registry.get("repositories", []):
+        if entry.get("repository") == repository and entry.get("enabled") is True:
+            return entry
+    raise ValueError(f"repository is not opted in: {repository}")
+
+
+def build_draft_pull_request(head: str, base: str, title: str, body: str) -> dict[str, Any]:
+    return {"head": head, "base": base, "title": title, "body": body, "draft": True}
+
+
+def create_draft_pull_request(
+    repository: str,
+    registry_path: Path,
+    head: str,
+    base: str,
+    title: str,
+    body: str,
+) -> dict[str, Any]:
+    policy = require_opt_in(repository, registry_path)
+    if policy.get("max_automation_level") != "draft-pr":
+        raise ValueError("repository policy does not permit Draft PR automation")
+    allowed_base = policy.get("base_ref", "main")
+    if base != allowed_base:
+        raise ValueError(f"base ref is not allowed: {base}")
+    payload = build_draft_pull_request(head, base, title, body)
+    return _gh_api(f"repos/{repository}/pulls", method="POST", fields=payload)
 
 
 def list_open_tickets(repository: str) -> list[dict[str, Any]]:

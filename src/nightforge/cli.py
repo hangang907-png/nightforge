@@ -10,7 +10,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-from nightforge.github import claim_github_ticket, list_open_tickets
+from nightforge.github import claim_github_ticket, create_draft_pull_request, list_open_tickets
 from nightforge.governance import transition_ticket_state
 
 
@@ -142,6 +142,14 @@ def main() -> None:
     github_claim_parser.add_argument("issue", type=int)
     github_claim_parser.add_argument("--node", required=True)
 
+    draft_parser = subparsers.add_parser("github-draft")
+    draft_parser.add_argument("repository")
+    draft_parser.add_argument("head")
+    draft_parser.add_argument("--base", default="main")
+    draft_parser.add_argument("--title", required=True)
+    draft_parser.add_argument("--body", required=True)
+    draft_parser.add_argument("--registry", type=Path, default=Path("config/repositories.json"))
+
     args = parser.parse_args()
     if args.command == "validate":
         document = json.loads(args.document.read_text(encoding="utf-8"))
@@ -160,6 +168,12 @@ def main() -> None:
         print(json.dumps(list_open_tickets(args.repository), ensure_ascii=False, indent=2))
     elif args.command == "github-claim":
         _print(claim_github_ticket(args.repository, args.issue, args.node))
+    elif args.command == "github-draft":
+        _print(
+            create_draft_pull_request(
+                args.repository, args.registry, args.head, args.base, args.title, args.body
+            )
+        )
 
 
 if __name__ == "__main__":

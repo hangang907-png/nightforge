@@ -1,0 +1,12 @@
+{
+  "schema_version": "0.1",
+  "repositories": [
+    {
+      "repository": "hangang907-png/nightforge",
+      "enabled": true,
+      "base_ref": "main",
+      "max_automation_level": "draft-pr",
+      "opted_in_by": "hangang907-png"
+    }
+  ]
+}

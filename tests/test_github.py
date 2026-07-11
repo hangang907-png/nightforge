@@ -1,6 +1,9 @@
+import json
+from pathlib import Path
+
 import pytest
 
-from nightforge.github import build_claim_update
+from nightforge.github import build_claim_update, build_draft_pull_request, require_opt_in
 
 
 def test_claim_update_replaces_open_state_and_preserves_labels():
@@ -34,3 +37,18 @@ def test_claim_update_rejects_already_claimed_ticket():
 
     with pytest.raises(ValueError, match="not open"):
         build_claim_update(issue, "node-b")
+
+
+def test_registry_rejects_repository_without_maintainer_opt_in(tmp_path):
+    registry = tmp_path / "repositories.json"
+    registry.write_text(json.dumps({"schema_version": "0.1", "repositories": []}), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="not opted in"):
+        require_opt_in("owner/repo", registry)
+
+
+def test_draft_pull_request_payload_cannot_be_published_ready():
+    payload = build_draft_pull_request("nightforge/ticket-1", "main", "Repair CI", "Closes #1")
+
+    assert payload["draft"] is True
+    assert payload["head"] == "nightforge/ticket-1"
