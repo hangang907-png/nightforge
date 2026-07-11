@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nightforge.dev/schemas/ledger-event.schema.json",
+  "title": "NightForge Ledger Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "event_id", "timestamp", "node_id", "ticket_id", "kind", "credits", "artifact_sha256"],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "event_id": {"type": "string", "format": "uuid"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "node_id": {"type": "string", "minLength": 1},
+    "ticket_id": {"type": "string", "pattern": "^DEV-[0-9]+$"},
+    "kind": {"enum": ["claim", "submit", "verify", "credit", "debit", "forfeit"]},
+    "credits": {"type": "number"},
+    "artifact_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

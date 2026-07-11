@@ -1,0 +1,12 @@
+{
+  "schema_version": "0.1",
+  "id": "DEV-1",
+  "rfc_id": "RFC-1",
+  "title": "Repair failing CI workflow",
+  "repository": "nightforge/example",
+  "base_ref": "main",
+  "task_type": "ci-repair",
+  "acceptance": ["all tests pass"],
+  "budget": {"agent_minutes": 30, "max_cost_usd": 1.5},
+  "deadline": "2026-07-12T00:00:00Z"
+}
