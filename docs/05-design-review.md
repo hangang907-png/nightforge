@@ -42,6 +42,6 @@ GitHub API 연동 전에 로컬 CLI가 다음 불변식을 보장해야 한다.
 
 ## 후속 게이트
 
-1. GitHub Issue 템플릿과 티켓 라벨 상태머신
+1. GitHub Issue 템플릿과 티켓 라벨 상태머신 ✅
 2. GitHub API 기반 티켓 조회·클레임(Draft PR 상한 유지)
 3. 웹훅 서명 검증과 서버리스 수신기 연결

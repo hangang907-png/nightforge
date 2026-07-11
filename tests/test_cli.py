@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from nightforge.cli import claim_ticket, record_webhook_delivery, submit_result, validate_document
+from nightforge.governance import transition_ticket_state
 
 
 ROOT = Path(__file__).parents[1]
@@ -108,3 +109,25 @@ def test_webhook_cli_records_payload(tmp_path):
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout)["accepted"] is True
     assert (output / "delivery-456.json").exists()
+
+
+def test_ticket_state_machine_accepts_claim_transition():
+    assert transition_ticket_state("state:open", "state:claimed") == "state:claimed"
+
+
+def test_ticket_state_machine_rejects_skipping_verification():
+    with pytest.raises(ValueError, match="invalid ticket transition"):
+        transition_ticket_state("state:submitted", "state:accepted")
+
+
+def test_transition_cli_reports_next_label():
+    result = subprocess.run(
+        [sys.executable, "-m", "nightforge.cli", "transition", "state:claimed", "state:submitted"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout) == {"from": "state:claimed", "to": "state:submitted", "valid": True}

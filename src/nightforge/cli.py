@@ -10,6 +10,8 @@ from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from nightforge.governance import transition_ticket_state
+
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -127,6 +129,10 @@ def main() -> None:
     webhook_parser.add_argument("payload", type=Path)
     webhook_parser.add_argument("--output", type=Path, default=Path(".nightforge/deliveries"))
 
+    transition_parser = subparsers.add_parser("transition")
+    transition_parser.add_argument("current")
+    transition_parser.add_argument("target")
+
     args = parser.parse_args()
     if args.command == "validate":
         document = json.loads(args.document.read_text(encoding="utf-8"))
@@ -138,6 +144,9 @@ def main() -> None:
         _print(submit_result(args.ticket_id, args.node, args.patch, args.verify, args.output))
     elif args.command == "webhook":
         _print(record_webhook_delivery(args.delivery_id, args.event, args.payload.read_bytes(), args.output))
+    elif args.command == "transition":
+        target = transition_ticket_state(args.current, args.target)
+        _print({"from": args.current, "to": target, "valid": True})
 
 
 if __name__ == "__main__":

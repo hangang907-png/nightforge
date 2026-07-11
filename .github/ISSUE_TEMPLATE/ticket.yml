@@ -1,0 +1,62 @@
+name: NightForge development ticket
+description: Issue an MVP0 test, CI repair, or documentation task from an RFC.
+title: "[DEV] "
+labels: ["kind:ticket", "state:open"]
+body:
+  - type: input
+    id: rfc
+    attributes:
+      label: Parent RFC
+      placeholder: RFC-1 or issue URL
+    validations:
+      required: true
+  - type: input
+    id: repository
+    attributes:
+      label: Opt-in repository
+      placeholder: owner/repository
+    validations:
+      required: true
+  - type: input
+    id: base_ref
+    attributes:
+      label: Base ref
+      value: main
+    validations:
+      required: true
+  - type: dropdown
+    id: task_type
+    attributes:
+      label: Task type
+      options: [test, ci-repair, documentation]
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Machine-testable acceptance criteria
+    validations:
+      required: true
+  - type: input
+    id: budget
+    attributes:
+      label: Budget ceiling
+      placeholder: "agent_minutes=30, max_cost_usd=1.50"
+    validations:
+      required: true
+  - type: input
+    id: deadline
+    attributes:
+      label: Deadline (UTC)
+      placeholder: "2026-07-12T00:00:00Z"
+    validations:
+      required: true
+  - type: checkboxes
+    id: safeguards
+    attributes:
+      label: Safeguards
+      options:
+        - label: Repository owner opted in to NightForge automation.
+          required: true
+        - label: Automated external submission is limited to a Draft PR.
+          required: true

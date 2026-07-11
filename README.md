@@ -27,6 +27,7 @@ python3 -m venv .venv
 .venv/bin/nightforge claim examples/ticket.json --node node-a
 .venv/bin/nightforge submit DEV-1 change.patch --node node-a --verify "pytest -q"
 .venv/bin/nightforge webhook delivery-123 issues payload.json
+.venv/bin/nightforge transition state:claimed state:submitted
 ```
 
 ## 상태
@@ -35,4 +36,6 @@ python3 -m venv .venv
 - RFC·티켓·원장 이벤트 JSON Schema
 - 노드 CLI 최소 수직 흐름 (검증 → 클레임 → 결과 manifest 제출)
 - 웹훅 delivery ID 멱등 기록 (중복 이벤트 무시)
+- RFC·개발 티켓 GitHub Issue Forms
+- 티켓 라벨 상태머신 (`open → claimed → submitted → verifying → accepted/rejected`)
 - GitHub API 연동 전 로컬 테스트

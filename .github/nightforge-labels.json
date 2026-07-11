@@ -1,0 +1,11 @@
+[
+  {"name":"kind:rfc","color":"5319e7","description":"NightForge governance proposal"},
+  {"name":"kind:ticket","color":"1d76db","description":"NightForge executable development ticket"},
+  {"name":"rfc:proposed","color":"d4c5f9","description":"RFC awaiting evidence and review"},
+  {"name":"state:open","color":"0e8a16","description":"Ticket available to claim"},
+  {"name":"state:claimed","color":"fbca04","description":"Ticket claimed by a node"},
+  {"name":"state:submitted","color":"1d76db","description":"Patch manifest submitted"},
+  {"name":"state:verifying","color":"006b75","description":"Proof Engine verification in progress"},
+  {"name":"state:accepted","color":"0e8a16","description":"Verification passed"},
+  {"name":"state:rejected","color":"d93f0b","description":"Verification failed; rework allowed"}
+]
