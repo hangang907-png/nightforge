@@ -1,0 +1,24 @@
+name = "nightforge-webhook"
+main = "src/worker.js"
+compatibility_date = "2026-07-11"
+workers_dev = true
+preview_urls = false
+
+[vars]
+NIGHTFORGE_GITHUB_REPOSITORY = "hangang907-png/nightforge"
+
+[[d1_databases]]
+binding = "DELIVERIES"
+database_name = "nightforge-deliveries"
+# Replace after: npx wrangler d1 create nightforge-deliveries
+database_id = "af211d04-c118-4260-8246-423ed7d2f82c"
+
+[[queues.producers]]
+binding = "GITHUB_EVENTS"
+queue = "nightforge-github-events"
+
+[[queues.consumers]]
+queue = "nightforge-github-events"
+max_batch_size = 10
+max_retries = 5
+

@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  test-python:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -20,3 +20,20 @@ jobs:
           cache: pip
       - run: pip install -e '.[dev]'
       - run: pytest -q
+
+  test-cloudflare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: cloudflare
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: cloudflare/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npx wrangler deploy --dry-run

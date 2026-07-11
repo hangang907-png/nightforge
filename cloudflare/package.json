@@ -1,0 +1,12 @@
+{
+  "name": "nightforge-cloudflare",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check": "npm run test"
+  },
+  "devDependencies": {
+    "wrangler": "4.110.0"
+  }
+}
