@@ -102,9 +102,10 @@ async function receiveWebhook(request, env) {
   }
   const payloadText = new TextDecoder().decode(payload);
   const payloadHash = await sha256(payload);
+  const status = event === "ping" ? "processed" : "pending";
   const result = await env.DELIVERIES.prepare(
-    "INSERT OR IGNORE INTO deliveries (delivery_id, event, payload_sha256, status) VALUES (?, ?, ?, 'pending')",
-  ).bind(deliveryId, event, payloadHash).run();
+    "INSERT OR IGNORE INTO deliveries (delivery_id, event, payload_sha256, status) VALUES (?, ?, ?, ?)",
+  ).bind(deliveryId, event, payloadHash, status).run();
   if (result.meta.changes === 0) return json({ accepted: false, delivery_id: deliveryId, duplicate: true }, 200);
   if (event === "check_suite") await env.GITHUB_EVENTS.send({ delivery_id: deliveryId, event, payload: payloadText, payload_sha256: payloadHash });
   return json({ accepted: true, delivery_id: deliveryId }, 202);
